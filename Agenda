@@ -60,7 +60,7 @@ int main()
        }
         default:
        {
-            printf("Opção invalida\n");
+            printf("Opção inválida\n");
             break;
         }
     }
