@@ -106,22 +106,24 @@ int login(){
 
          login = fopen("login.txt", "r"); // abrir arquivo modo leitura
 
-          // Lê cada linha do arquivo e compara com a stringParaComparar
-         while (fgets(email, sizeof(email), login)) {
-            // Remove o caractere de nova linha da linha lida
-         //linha[strcspn(linha, "\n")] = '\0';
+        char linha[100]; // Suponha que cada linha do arquivo pode ter até 100 caracteres
+        int encontrou = 0; // Flag para indicar se as credenciais foram encontradas
 
-              if (strcmp(email, login) == 0) {
+        //le a linha do arquivo
 
-                printf("Encontrou uma correspondência: %s\n", email);
-           }
+      /*  while(fgets(linha, sizeof(linha), login)){
+
+        }
+
+
+           
 
               else{
                 printf("nao: %s\n", email);
                  return 0;
             }
 
-         }
+         }*/
 
         break;
       }
