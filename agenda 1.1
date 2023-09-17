@@ -1,0 +1,266 @@
+#include <stdio.h>
+#include <string.h>
+
+ struct agenda
+    {
+        char nome[50];
+        int ddd;
+        char numero[20];
+    };
+
+ struct agenda Agenda;
+
+ int login();
+ void menu();
+ void adicionar_contatos(FILE *arq);
+ void listar_contatos(FILE *arq);
+ void criarArquivoPrincipal(FILE *arq);
+ void possicao(FILE *arq, char busca[]); //para determinar a possicao
+ void editar();
+ void excluir();
+ void sobre();
+
+
+int main()
+{
+    int opcao; // testa se pode continuar programa
+
+    // preciso de uma variavel para manipular arquivos
+
+    FILE *arquivo; // variável do tipo FILE para manipular arquivos (cria um ponteiro de arquivo)
+    
+    if (login() != 0){
+
+     do{
+        menu();
+        scanf("%d", &opcao);
+
+    switch(opcao)
+    {
+        case 1:
+        { 
+             adicionar_contatos(arquivo);
+              break;
+        }
+        case 2: 
+        {
+             listar_contatos(arquivo);
+             break;
+        }
+        case 3:
+       {
+             
+             break;
+       }
+        case 4:
+       {
+
+             break;
+       }
+        case 5:
+       {
+             sobre();
+             break;
+       }
+        default:
+       {
+            printf("Opção invalida\n");
+            break;
+        }
+    }
+    } while (opcao != 0); // enquado opcao ser diferente de 0 
+    
+    }
+    
+    return 0;
+}
+int login(){
+
+   FILE *login;
+   int opcao;
+   char email[20], senha[20];
+
+   login = fopen("login.txt", "ab");
+
+   if(login == NULL){
+     login = fopen("login.txt", "wb");
+     printf("\nArquivo criado com sucesso! \n");
+     fclose(login);
+   }
+  
+    printf("Fazer Login -> (Digite 1) *\n");
+    printf("Criar Conta -> (Digite 2) *\n");
+    printf("* Sair -> (Digite 0) *\n");
+    scanf("%d", &opcao);
+
+   switch (opcao)
+   {
+     case 1:
+      {
+        printf("***** Preencha seus dados ******\n");
+         printf("Digite seu email:\n");
+         scanf("%s", &email);
+
+         printf("Digite sua senha:\n");
+         scanf("%s", &senha);
+
+         login = fopen("login.txt", "r"); // abrir arquivo modo leitura
+
+          // Lê cada linha do arquivo e compara com a stringParaComparar
+         while (fgets(email, sizeof(email), login)) {
+            // Remove o caractere de nova linha da linha lida
+         //linha[strcspn(linha, "\n")] = '\0';
+
+              if (strcmp(email, login) == 0) {
+
+                printf("Encontrou uma correspondência: %s\n", email);
+           }
+
+              else{
+                printf("nao: %s\n", email);
+                 return 0;
+            }
+
+         }
+
+        break;
+      }
+
+      case 2:
+      {
+         printf("***** Crie sua conta ******\n");
+         printf("Digite seu email(Com até 20 caracteres):\n");
+         scanf("%s", &email);
+
+         printf("Digite sua senha(Com até 20 caracteres)::\n");
+         scanf("%s", &senha);
+
+         fprintf(login,"%s %s\n", email, senha); 
+         fclose(login);
+        
+        break;
+      }
+
+      case 0:
+      {
+        return opcao;
+        break;
+      }
+
+     default:{
+
+         printf("Opção invalida\n");
+        break;
+      }
+   }
+   return opcao;
+
+}
+
+void menu(){ 
+    
+    printf("\n* Adicionar contato -> (Digite 1) *\n");
+    printf("* Listar contatos ->  (Digite 2) *\n");
+    printf("* Editar Contatos ->  (Digite 3) *\n");
+    printf("* Excluir Contato ->  (Digite 4) *\n");
+    printf("* Sobre ->  (Digite 5) *\n");
+    printf("* Sair -> (Digite 0) *\n");
+
+}
+
+void adicionar_contatos(FILE *arq){
+    
+    // sempre antes de inserir um contato, preciso verificar se o arquivo existe
+    arq = fopen("contatos.txt", "ab"); // Abre o arquivo em modo de anexação
+
+    if (arq == NULL) {
+        // se o arquivo não existe, pede para criar
+        criarArquivoPrincipal(arq);
+        arq = fopen("contatos.txt", "ab");
+    }
+    
+    printf("\nDigite o nome do contato: ");
+    scanf ("%s", Agenda.nome);
+
+    printf("\nDDD: ");
+    scanf ("%d", &Agenda.ddd);
+
+    printf("\nDigite o numero: ");
+    scanf ("%s", Agenda.numero);
+            
+       // Escreve os dados do novo contato no arquivo
+    fprintf(arq,"%s %d %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+
+    fclose(arq); // fechar arquivo
+}
+
+void listar_contatos(FILE *arq){
+
+      arq = fopen("contatos.txt", "r"); // Abre o arquivo em modo de leitura
+
+    if (arq == NULL)
+    {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    printf("              * Contatos *           \n\n");
+
+    while (fscanf(arq, "%s %d %s", Agenda.nome, &Agenda.ddd, Agenda.numero) != EOF) // lê dados do arquivo especificado arqde acordo com o formato especificado e armazena os valores lidos nas variáveis ​​fornecidas.
+    //EOF verifica fim do arquivo
+    {
+        printf("Nome: %s, DDD: %d, Numero: %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+    }
+
+    fclose(arq); // fechar arquivo
+}
+
+void criarArquivoPrincipal(FILE *arq) {
+
+    printf("\n\nPrimeiro registro - criando o arquivo para salvar meus contatos...");
+    arq = fopen("contatos.txt", "wb");
+
+    if (arq != NULL) //verifica se o arquivo foi criado
+    {
+        printf("\nArquivo criado com sucesso! \n");
+        fclose(arq);
+    }
+    else
+    {
+        printf("\nErro ao criar: ");
+        perror("fopen");
+    }
+    
+}
+
+void editar(){
+   
+    printf("Função de edição ainda não implementada.\n");
+}
+
+void excluir(){
+    
+    printf("Função de exclusão ainda não implementada.\n");
+}
+
+void sobre(){
+printf("Desenvolvido por Evandro Weissheimer, acadêmico de ciência da computação\n");
+printf("Data de finalização 11/09/23\n");
+}
+
+void possicao(FILE *arq, char busca[]){
+    arq = fopen("contatos.txt", "r");
+    int pos; // variável tipo flag
+    int conta; // variável tipo contador
+    //esse while ou acaba quando chegar ao fim dos registros ou quando achar o registro desejado (executa break)
+   while(fread(&Agenda, sizeof(Agenda), 1, arq)){
+
+    if( strcmpi(busca, Agenda.nome) == 0){
+         pos = conta; //armazeno qual é a posição lógica do registro no arquivo
+         break; //sai fora do LAÇO WHILE
+      }
+      conta++;
+   }
+   return pos; //se retornar -1 chegou no fim e não achou o registro. Senão, retorna a posição
+ }
+
