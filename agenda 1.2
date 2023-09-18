@@ -1,0 +1,384 @@
+ #include <stdio.h>
+#include <string.h>
+#include <time.h> //biblioteca para obter dados de tempo (data, hora, etc)
+
+ struct agenda
+    {
+        char nome[50];
+        int ddd;
+        char numero[20];
+    };
+
+ struct agenda Agenda;
+ 
+ void addLogs(FILE *arq, char action[]);
+ void adicionar_contatos(FILE *arq);
+ void criarArquivoPrincipal(FILE *arq);
+ void editar();
+ void excluir();
+ void listar_contatos(FILE *arq);
+ int login();
+ void menu();
+ void sobre();
+ 
+int main()
+{
+    int opcao; // testa se pode continuar programa
+
+    // preciso de uma variavel para manipular arquivos
+
+    FILE *arquivo; // variável do tipo FILE para manipular arquivos (cria um ponteiro de arquivo)
+    
+    if (login() != 0){ // verifica se as informações de login estao corretas
+
+     do{
+        menu(); // chama a função menu
+        scanf("%d", &opcao); // salva a opção que o usuário digitar 
+
+    // verifica qual a opção que o usuario digitou
+    switch(opcao)
+    {
+        case 0:
+       {
+             printf("Obrigado por utilizar.\n");
+             break;
+       }
+        case 1:
+        { 
+             adicionar_contatos(arquivo); // chama a função para adicionar contatos
+             addLogs(arquivo, "Adicionou um novo Contato"); // chama a função para salvar as informações do usuario
+             break;
+        }
+        case 2: 
+        {
+             listar_contatos(arquivo); // chama a função para listar contatos
+             addLogs(arquivo, "Listou os Contatos");  // chama a função para salvar as informações do usuario
+             break;
+        }
+        case 3:
+       {
+             listar_contatos(arquivo); // chama a função para listar contatos
+             editar();
+             break;
+       }
+        case 4:
+       {
+             listar_contatos(arquivo); // chama a função para listar contatos
+             excluir();
+             break;
+       }
+        case 5:
+       {
+             sobre(); // chama a função sobre
+             addLogs(arquivo, "Mostrando o sobre");   // chama a função para salvar as informações do usuario
+             break;
+       }
+        default:
+       {
+            printf("Opção invalida\n");
+            addLogs(arquivo, "Erro");
+            break;
+        }
+    }
+    } while (opcao != 0); // enquado opção ser diferente de 0 
+    
+    }
+    
+    return 0;
+}
+
+void addLogs(FILE *arq, char action[]) {
+
+    // sempre antes de inserir um contato, preciso verificar se o arquivo existe
+    arq = fopen("logs.txt", "ab"); // Abre o arquivo em modo de anexação
+
+    time_t t = time(NULL); //crio uma estrutura que pega o tempo do PC no momento
+    struct tm tm = *localtime(&t); //tm quebra o tempo em um formato intelegível
+
+    if (arq == NULL) {
+        // se o arquivo não existe, pede para criar
+        criarArquivoPrincipal(arq);
+        arq = fopen("logs.txt", "ab");
+    }
+
+    // Escreve os dados do novo contato no arquivo
+    fprintf(arq,"%s - [%d-%02d-%02d %02d:%02d:%02d]", action, tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    fclose(arq); // fechar arquivo
+}
+
+int login()
+{
+    FILE *login; // ponteiro para arquivo 
+    int opcao; // variavel para armazenar a opção do usuário
+    char email[20], senha[20]; // variáveis para armazenar as informações que o usuário digitou para email e senha
+    
+    printf("******* Faça seu login *******\n\n");
+    printf("* (Digite 1) -> Criar Conta *\n");
+    printf("* (Digite 2) -> Fazer Login *\n");
+    printf("* (Digite 0) -> Sair *\n");
+    scanf("%d", &opcao);
+
+    switch (opcao)
+    {
+    case 1:
+    {
+           printf("***** Crie sua conta ******\n\n");
+            printf("Digite seu email (Com até 20 caracteres):\n");
+            scanf("%s", email);
+
+            printf("Digite sua senha (Com até 20 caracteres):\n");
+            scanf("%s", senha);
+
+            login = fopen("login.txt", "a");
+
+            if (login == NULL) {
+                printf("Erro ao abrir o arquivo\n");
+                return 0;
+            }
+
+            fprintf(login, "%s\n%s\n", email, senha);
+            fclose(login);
+            break;
+        
+    }
+    case 2:
+    {
+       printf("***** Preencha seus dados ******\n\n");
+            printf("Digite seu email:\n");
+            scanf("%s", email);
+
+            printf("Digite sua senha:\n");
+            scanf("%s", senha);
+
+            login = fopen("login.txt", "r");
+
+            if (login == NULL) {
+                printf("Erro ao abrir o arquivo\n");
+                return 0;
+            }
+
+            char linha[100];
+            int encontrou = 0;
+
+            while (fgets(linha, sizeof(linha), login)) {
+                linha[strcspn(linha, "\n")] = '\0';
+
+                if (strcasecmp(linha, email) == 0) {
+                    fgets(linha, sizeof(linha), login);
+                    linha[strcspn(linha, "\n")] = '\0';
+
+                    if (strcasecmp(linha, senha) == 0) {
+                        encontrou = 1;
+                        break;
+                    }
+                }
+            }
+
+            fclose(login);
+
+            if (encontrou){
+                printf("\nLogin bem-sucedido!\n");
+                return 1;
+            } 
+            else{
+                printf("\nLogin falhou.\n");
+                return 0;
+            }
+    }
+    case 0:
+    {
+        return opcao;
+    }
+    default:
+    {
+        printf("Opção inválida\n");
+        break;
+    }
+    }
+
+    return opcao;
+}
+
+
+void menu(){ 
+    
+    printf("\n* (Digite 1) -> Adicionar contato *\n");
+    printf("* (Digite 2) -> Listar contatos *\n");
+    printf("* (Digite 3) -> Editar Contatos *\n");
+    printf("* (Digite 4) -> Excluir Contato *\n");
+    printf("* (Digite 5) -> Sobre *\n");
+    printf("* (Digite 0) -> Sair *\n");
+
+}
+
+void adicionar_contatos(FILE *arq){
+    
+    // sempre antes de inserir um contato, preciso verificar se o arquivo existe
+    arq = fopen("contatos.txt", "ab"); // Abre o arquivo em modo de anexação
+
+    if (arq == NULL) {
+        // se o arquivo não existe, pede para criar
+        criarArquivoPrincipal(arq);
+        arq = fopen("contatos.txt", "ab");
+    }
+    
+    printf("\nDigite o nome do contato: ");
+    scanf ("%s", Agenda.nome);
+
+    printf("\nDDD: ");
+    scanf ("%d", &Agenda.ddd);
+
+    printf("\nDigite o numero: ");
+    scanf ("%s", Agenda.numero);
+            
+       // Escreve os dados do novo contato no arquivo
+    fprintf(arq,"%s %d %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+
+    fclose(arq); // fechar arquivo
+}
+
+void listar_contatos(FILE *arq){
+
+      arq = fopen("contatos.txt", "r"); // Abre o arquivo em modo de leitura
+
+    if (arq == NULL)
+    {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    printf("              * Contatos *           \n\n");
+
+    while (fscanf(arq, "%s %d %s", Agenda.nome, &Agenda.ddd, Agenda.numero) != EOF) // lê dados do arquivo especificado arqde acordo com o formato especificado e armazena os valores lidos nas variáveis ​​fornecidas.
+    //EOF verifica fim do arquivo
+    {
+        printf("Nome: %s, DDD: %d, Numero: %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+    }
+
+    fclose(arq); // fechar arquivo
+}
+
+void criarArquivoPrincipal(FILE *arq) {
+
+    printf("\n\nPrimeiro registro - criando o arquivo para salvar meus contatos...");
+    arq = fopen("contatos.txt", "wb");
+
+    if (arq != NULL) //verifica se o arquivo foi criado
+    {
+        printf("\nArquivo criado com sucesso! \n");
+        fclose(arq);
+    }
+    else
+    {
+        printf("\nErro ao criar: ");
+        perror("fopen");
+    }
+    
+}
+
+void editar(){
+   FILE *arq; 
+    char nome[50];
+
+    printf("\nDigite o nome do contato que deseja editar: ");
+    scanf(" %s", nome);
+
+    arq = fopen("contatos.txt", "r+");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    FILE *temp = fopen("temp.txt", "w");
+    if (temp == NULL) {
+        printf("Erro ao criar o arquivo temporário\n");
+        fclose(arq);
+        return;
+    }
+
+    struct agenda contato;
+    int encontrado = 0;
+
+    while (fscanf(arq, "%s %d %s", contato.nome, &contato.ddd, contato.numero) != EOF) {
+        if (strcmp(nome, contato.nome) == 0) {
+            encontrado = 1;
+
+            printf("Novo nome: ");
+            scanf(" %s", contato.nome);
+
+            printf("Novo DDD: ");
+            scanf("%d", &contato.ddd);
+
+            printf("Novo número: ");
+            scanf("%s", contato.numero);
+
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+            printf("Contato editado com sucesso!\n");
+        } else {
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        }
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+
+    fclose(arq);
+    fclose(temp);
+
+    remove("contatos.txt");
+    rename("temp.txt", "contatos.txt");
+}
+    
+
+void excluir(){
+    
+    FILE *arq, *temp; // declaracao de ponteiro para arquivo
+    char nome[30]; // variavel para armazenar o nome da pessoa para excluir
+
+    printf("\nDigite o nome do contato que deseja excluir: ");
+    scanf(" %s", nome);
+
+    arq = fopen("contatos.txt", "r");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    temp = fopen("temp.txt", "w");
+    if (temp == NULL) {
+        printf("Erro ao criar o arquivo temporário\n");
+        fclose(arq);
+        return;
+    }
+
+    struct agenda contato;
+    int encontrado = 0;
+
+    while (fscanf(arq, "%s %d %s", contato.nome, &contato.ddd, contato.numero) != EOF) {
+        if (strcmp(nome, contato.nome) == 0) {
+            encontrado = 1;
+            printf("Contato excluído: %s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        } else {
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        }
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+
+    fclose(arq);
+    fclose(temp);
+
+    remove("contatos.txt");
+    rename("temp.txt", "contatos.txt");
+}
+
+void sobre(){
+printf("Desenvolvido por Evandro Weissheimer, acadêmico de ciência da computação\n");
+printf("Data de finalização 11/09/23\n");
+}
+
+
