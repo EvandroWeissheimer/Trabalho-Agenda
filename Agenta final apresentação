@@ -189,11 +189,11 @@ int login(){
         if (encontrou == 1) // se encontrar login
         {
             printf("\nLogin bem-sucedido!\n");
-            return 1;
+            return 1; // retorna 1 para login bem-sucedido
         }
         else // se nao encontrar
         {
-            printf("\nLogin falhou.\n");
+            printf("\nLogin falhou.\n"); // retorna 0 para login incorreto
             return 0;
         }
       }
