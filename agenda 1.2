@@ -1,4 +1,4 @@
- #include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h> //biblioteca para obter dados de tempo (data, hora, etc)
 
@@ -59,12 +59,14 @@ int main()
        {
              listar_contatos(arquivo); // chama a função para listar contatos
              editar();
+             addLogs(arquivo, "Editou os Contatos");
              break;
        }
         case 4:
        {
              listar_contatos(arquivo); // chama a função para listar contatos
              excluir();
+            addLogs(arquivo, "Excluiu Contatos");
              break;
        }
         case 5:
