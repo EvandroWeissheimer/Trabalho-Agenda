@@ -21,8 +21,8 @@
  void menu();
  void sobre();
  
-int main()
-{
+int main(){
+
     int opcao; // testa se pode continuar programa
 
     // preciso de uma variavel para manipular arquivos
@@ -88,8 +88,8 @@ int main()
     
     return 0;
 }
-
-void addLogs(FILE *arq, char action[]) {
+// Função para adicionar logs
+void addLogs(FILE *arq, char action[]){
 
     // sempre antes de inserir um contato, preciso verificar se o arquivo existe
     arq = fopen("logs.txt", "ab"); // Abre o arquivo em modo de anexação
@@ -108,9 +108,9 @@ void addLogs(FILE *arq, char action[]) {
 
     fclose(arq); // fechar arquivo
 }
+// Função para realizar o login
+int login(){
 
-int login()
-{
     FILE *login; // ponteiro para arquivo 
     int opcao; // variavel para armazenar a opção do usuário
     char email[20], senha[20]; // variáveis para armazenar as informações que o usuário digitou para email e senha
@@ -146,47 +146,55 @@ int login()
     }
     case 2:
     {
-       printf("***** Preencha seus dados ******\n\n");
-            printf("Digite seu email:\n");
-            scanf("%s", email);
+       {
+        printf("***** Preencha seus dados ******\n\n");
+        printf("Digite seu email:\n");
+        scanf("%s", email);
 
-            printf("Digite sua senha:\n");
-            scanf("%s", senha);
+        printf("Digite sua senha:\n");
+        scanf("%s", senha);
 
-            login = fopen("login.txt", "r");
+        login = fopen("login.txt", "r");
 
-            if (login == NULL) {
-                printf("Erro ao abrir o arquivo\n");
-                return 0;
-            }
+        if (login == NULL)
+        {
+            printf("Erro ao abrir o arquivo\n");
+            return 0;
+        }
 
-            char linha[100];
-            int encontrou = 0;
+        char linha[100];
+        int encontrou = 0;
 
-            while (fgets(linha, sizeof(linha), login)) {
+        while (fgets(linha, sizeof(linha), login))
+        {
+            linha[strcspn(linha, "\n")] = '\0';
+
+            if (strcasecmp(linha, email) == 0)
+            {
+                fgets(linha, sizeof(linha), login);
                 linha[strcspn(linha, "\n")] = '\0';
 
-                if (strcasecmp(linha, email) == 0) {
-                    fgets(linha, sizeof(linha), login);
-                    linha[strcspn(linha, "\n")] = '\0';
-
-                    if (strcasecmp(linha, senha) == 0) {
-                        encontrou = 1;
-                        break;
-                    }
+                if (strcasecmp(linha, senha) == 0)
+                {
+                    encontrou = 1;
+                    break;
                 }
             }
+        }
 
-            fclose(login);
+        fclose(login);
 
-            if (encontrou){
-                printf("\nLogin bem-sucedido!\n");
-                return 1;
-            } 
-            else{
-                printf("\nLogin falhou.\n");
-                return 0;
-            }
+        if (encontrou)
+        {
+            printf("\nLogin bem-sucedido!\n");
+            return 1;
+        }
+        else
+        {
+            printf("\nLogin falhou.\n");
+            return 0;
+        }
+      }
     }
     case 0:
     {
@@ -202,8 +210,9 @@ int login()
     return opcao;
 }
 
+// Função para exibir o menu
+void menu(){
 
-void menu(){ 
     
     printf("\n* (Digite 1) -> Adicionar contato *\n");
     printf("* (Digite 2) -> Listar contatos *\n");
@@ -214,6 +223,7 @@ void menu(){
 
 }
 
+// Função para adicionar contatos
 void adicionar_contatos(FILE *arq){
     
     // sempre antes de inserir um contato, preciso verificar se o arquivo existe
@@ -240,6 +250,7 @@ void adicionar_contatos(FILE *arq){
     fclose(arq); // fechar arquivo
 }
 
+// Função para listar contatos
 void listar_contatos(FILE *arq){
 
       arq = fopen("contatos.txt", "r"); // Abre o arquivo em modo de leitura
@@ -261,6 +272,7 @@ void listar_contatos(FILE *arq){
     fclose(arq); // fechar arquivo
 }
 
+// Função para criar o arquivo de contatos se não existir
 void criarArquivoPrincipal(FILE *arq) {
 
     printf("\n\nPrimeiro registro - criando o arquivo para salvar meus contatos...");
@@ -279,6 +291,7 @@ void criarArquivoPrincipal(FILE *arq) {
     
 }
 
+// Função para editar os contatos
 void editar(){
    FILE *arq; 
     char nome[50];
@@ -333,7 +346,7 @@ void editar(){
     rename("temp.txt", "contatos.txt");
 }
     
-
+// Função para excluir um contato
 void excluir(){
     
     FILE *arq, *temp; // declaracao de ponteiro para arquivo
@@ -378,6 +391,7 @@ void excluir(){
     rename("temp.txt", "contatos.txt");
 }
 
+// Função para exibir informações sobre o programa
 void sobre(){
 printf("******* Créditos ******\n");
 printf("Desenvolvido por:\nAlexandre Beilner, Evandro Weissheimer, Gabriel Marino da Silva, Matheus Eickhoff.\n");
