@@ -102,7 +102,7 @@ void addLogs(FILE *arq, char action[]) {
     }
 
     // Escreve os dados do novo contato no arquivo
-    fprintf(arq,"%s - [%d-%02d-%02d %02d:%02d:%02d]", action, tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    fprintf(arq,"%s - [%d-%02d-%02d %02d:%02d:%02d]\n", action, tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
     fclose(arq); // fechar arquivo
 }
