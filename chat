@@ -1,0 +1,323 @@
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+
+struct agenda {
+    char nome[50];
+    int ddd;
+    char numero[20];
+};
+
+struct agenda Agenda;
+
+int login();
+void menu();
+void adicionar_contatos(FILE *arq);
+void listar_contatos(FILE *arq);
+void criarArquivoPrincipal(FILE *arq);
+void editar_contato();
+void excluir_contato();
+void sobre();
+void addLogs(FILE *arq, const char action[]);
+
+int main() {
+    int opcao;
+    FILE *arquivo_contatos;
+
+    if (login() != 0) {
+        do {
+            menu();
+            scanf("%d", &opcao);
+
+            switch (opcao) {
+                case 1:
+                    adicionar_contatos(arquivo_contatos);
+                    addLogs(arquivo_contatos, "Adicionou um novo Contato");
+                    break;
+                case 2:
+                    listar_contatos(arquivo_contatos);
+                    addLogs(arquivo_contatos, "Listou os Contatos");
+                    break;
+                case 3:
+                    editar_contato();
+                    break;
+                case 4:
+                    excluir_contato();
+                    break;
+                case 5:
+                    sobre();
+                    addLogs(arquivo_contatos, "Mostrando o sobre");
+                    break;
+                default:
+                    printf("Opção inválida\n");
+                    addLogs(arquivo_contatos, "Erro");
+                    break;
+            }
+        } while (opcao != 0);
+    }
+
+    return 0;
+}
+
+void addLogs(FILE *arq, const char action[]) {
+    arq = fopen("logs.txt", "ab");
+
+    if (arq == NULL) {
+        perror("Erro ao abrir arquivo de logs");
+        return;
+    }
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    fprintf(arq, "%s - [%d-%02d-%02d %02d:%02d:%02d]\n", action, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    fclose(arq);
+}
+
+int login() {
+    FILE *login;
+    int opcao;
+    char email[20], senha[20];
+
+    printf("Fazer Login -> (Digite 1) *\n");
+    printf("Criar Conta -> (Digite 2) *\n");
+    printf("* Sair -> (Digite 0) *\n");
+    scanf("%d", &opcao);
+
+    switch (opcao) {
+        case 1: {
+            printf("***** Preencha seus dados ******\n");
+            printf("Digite seu email:\n");
+            scanf("%s", email);
+
+            printf("Digite sua senha:\n");
+            scanf("%s", senha);
+
+            login = fopen("login.txt", "r");
+
+            if (login == NULL) {
+                printf("Erro ao abrir o arquivo\n");
+                return 0;
+            }
+
+            char linha[100];
+            int encontrou = 0;
+
+            while (fgets(linha, sizeof(linha), login)) {
+                linha[strcspn(linha, "\n")] = '\0';
+
+                if (strcasecmp(linha, email) == 0) {
+                    fgets(linha, sizeof(linha), login);
+                    linha[strcspn(linha, "\n")] = '\0';
+
+                    if (strcasecmp(linha, senha) == 0) {
+                        encontrou = 1;
+                        break;
+                    }
+                }
+            }
+
+            fclose(login);
+
+            if (encontrou) {
+                printf("Login bem-sucedido!\n");
+                return 1;
+            } else {
+                printf("Login falhou.\n");
+                return 0;
+            }
+        }
+        case 2: {
+            printf("***** Crie sua conta ******\n");
+            printf("Digite seu email (Com até 20 caracteres):\n");
+            scanf("%s", email);
+
+            printf("Digite sua senha (Com até 20 caracteres):\n");
+            scanf("%s", senha);
+
+            login = fopen("login.txt", "a");
+
+            if (login == NULL) {
+                printf("Erro ao abrir o arquivo\n");
+                return 0;
+            }
+
+            fprintf(login, "%s\n%s\n", email, senha);
+            fclose(login);
+            break;
+        }
+        case 0: {
+            return opcao;
+        }
+        default: {
+            printf("Opção inválida\n");
+            break;
+        }
+    }
+
+    return opcao;
+}
+
+void menu() {
+    printf("\n* Adicionar contato -> (Digite 1) *\n");
+    printf("* Listar contatos ->  (Digite 2) *\n");
+    printf("* Editar Contatos ->  (Digite 3) *\n");
+    printf("* Excluir Contato ->  (Digite 4) *\n");
+    printf("* Sobre ->  (Digite 5) *\n");
+    printf("* Sair -> (Digite 0) *\n");
+}
+
+void adicionar_contatos(FILE *arq) {
+    arq = fopen("contatos.txt", "ab");
+
+    if (arq == NULL) {
+        criarArquivoPrincipal(arq);
+        arq = fopen("contatos.txt", "ab");
+    }
+
+    printf("\nDigite o nome do contato: ");
+    scanf(" %[^\n]", Agenda.nome);
+
+    printf("\nDDD: ");
+    scanf("%d", &Agenda.ddd);
+
+    printf("\nDigite o número: ");
+    scanf("%s", Agenda.numero);
+
+    fprintf(arq, "%s %d %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+
+    fclose(arq);
+}
+
+void listar_contatos(FILE *arq) {
+    arq = fopen("contatos.txt", "r");
+
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    printf("              * Contatos *           \n\n");
+
+    while (fscanf(arq, "%s %d %s", Agenda.nome, &Agenda.ddd, Agenda.numero) != EOF) {
+        printf("Nome: %s, DDD: %d, Numero: %s\n", Agenda.nome, Agenda.ddd, Agenda.numero);
+    }
+
+    fclose(arq);
+}
+
+void criarArquivoPrincipal(FILE *arq) {
+    printf("\n\nPrimeiro registro - criando o arquivo para salvar meus contatos...");
+    arq = fopen("contatos.txt", "wb");
+
+    if (arq != NULL) {
+        printf("\nArquivo criado com sucesso! \n");
+        fclose(arq);
+    } else {
+        printf("\nErro ao criar: ");
+        perror("fopen");
+    }
+}
+
+void editar_contato() {
+    FILE *arq;
+    char nome[50];
+
+    printf("Digite o nome do contato que deseja editar: ");
+    scanf(" %[^\n]", nome);
+
+    arq = fopen("contatos.txt", "r+");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    FILE *temp = fopen("temp.txt", "w");
+    if (temp == NULL) {
+        printf("Erro ao criar o arquivo temporário\n");
+        fclose(arq);
+        return;
+    }
+
+    struct agenda contato;
+    int encontrado = 0;
+
+    while (fscanf(arq, "%s %d %s", contato.nome, &contato.ddd, contato.numero) != EOF) {
+        if (strcmp(nome, contato.nome) == 0) {
+            encontrado = 1;
+
+            printf("Novo nome: ");
+            scanf(" %[^\n]", contato.nome);
+
+            printf("Novo DDD: ");
+            scanf("%d", &contato.ddd);
+
+            printf("Novo número: ");
+            scanf("%s", contato.numero);
+
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+            printf("Contato editado com sucesso!\n");
+        } else {
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        }
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+
+    fclose(arq);
+    fclose(temp);
+
+    remove("contatos.txt");
+    rename("temp.txt", "contatos.txt");
+}
+
+void excluir_contato() {
+    FILE *arq, *temp;
+    char nome[50];
+
+    printf("Digite o nome do contato que deseja excluir: ");
+    scanf(" %[^\n]", nome);
+
+    arq = fopen("contatos.txt", "r");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo\n");
+        return;
+    }
+
+    temp = fopen("temp.txt", "w");
+    if (temp == NULL) {
+        printf("Erro ao criar o arquivo temporário\n");
+        fclose(arq);
+        return;
+    }
+
+    struct agenda contato;
+    int encontrado = 0;
+
+    while (fscanf(arq, "%s %d %s", contato.nome, &contato.ddd, contato.numero) != EOF) {
+        if (strcmp(nome, contato.nome) == 0) {
+            encontrado = 1;
+            printf("Contato excluído: %s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        } else {
+            fprintf(temp, "%s %d %s\n", contato.nome, contato.ddd, contato.numero);
+        }
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+
+    fclose(arq);
+    fclose(temp);
+
+    remove("contatos.txt");
+    rename("temp.txt", "contatos.txt");
+}
+
+void sobre() {
+    printf("Desenvolvido por Evandro Weissheimer, acadêmico de ciência da computação\n");
+    printf("Data de finalização 11/09/23\n");
+}
