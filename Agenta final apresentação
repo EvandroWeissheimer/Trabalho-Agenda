@@ -99,7 +99,6 @@ void addLogs(FILE *arq, char action[]){
 
     if (arq == NULL) {
         // se o arquivo não existe, pede para criar
-        criarArquivoPrincipal(arq);
         arq = fopen("logs.txt", "ab");
     }
 
@@ -232,7 +231,8 @@ void adicionar_contatos(FILE *arq){
 
     if (arq == NULL)  //verifica se o arquivo foi criado
     {
-        printf("Erro ao abrir o arquivo\n");
+       // se nao foi criado chama a função
+        criarArquivoPrincipal(arq);
         return;
     }
     
