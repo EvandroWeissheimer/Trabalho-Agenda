@@ -141,6 +141,7 @@ int login(){
 
             fprintf(login, "%s\n%s\n", email, senha); // vai escrevaer as informacoes da variavel no arquivo
             fclose(login); // fechar o arquivo
+            return 1;
             break;
         
     }
@@ -208,8 +209,6 @@ int login(){
         break;
     }
     }
-
-    return 0;
     // codigo apresentava erro no retorno do if podendo entrar nas funcoes com numeros com 3 etc;
 }
 
