@@ -204,11 +204,13 @@ int login(){
     default:
     {
         printf("Opção inválida\n");
+        return 0;
         break;
     }
     }
 
-    return opcao;
+    return 0;
+    // codigo apresentava erro no retorno do if podendo entrar nas funcoes com numeros com 3 etc;
 }
 
 // Função para exibir o menu
